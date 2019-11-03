@@ -13,6 +13,8 @@ import io.ktor.jackson.jackson
 import io.ktor.response.*
 import io.ktor.request.*
 import io.ktor.routing.get
+import io.ktor.routing.post
+import io.ktor.routing.route
 import io.ktor.routing.routing
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
@@ -49,9 +51,17 @@ fun Application.module(testing: Boolean = false) {
     val taskRepository: TaskRepository = ExposedTaskRepository()
     val TaskController = TaskController(taskRepository)
     routing {
-        get("/tasks"){
-            TaskController.index(call)
-        }
+        route("/tasks"){
+            get(""){
+                TaskController.index(call)
+            }
+            post(""){
+                TaskController.create(call)
+            }
+            get("/{id}"){
+                TaskController.show(call)
+            }
+    }
     }
 }
 

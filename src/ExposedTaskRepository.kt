@@ -4,6 +4,8 @@ import com.example.TaskTable.createdDateTime
 import com.example.TaskTable.description
 import com.example.TaskTable.title
 import org.jetbrains.exposed.sql.SortOrder
+import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.DateTime
@@ -28,6 +30,34 @@ class ExposedTaskRepository:TaskRepository {
         }
     }
 
+    override fun insertTask(task: Task){
+        return transaction{
+            TaskTable.insert {
+                it[title] = task.title
+                it[description] = task.description
+                it[createdDateTime] = task.createdDateTime.toJodaDateTime()
+                it[updatedDateTime] = task.updatedDateTime.toJodaDateTime()
+                it[isCompleted] = task.completed
+            }
+        }
+    }
+
+    override fun findById(id:Long): Task? {
+        return transaction {
+            TaskTable.select { TaskTable.id eq id }
+                .map {
+                    Task(
+                        id = it[TaskTable.id].value,
+                        title = it[TaskTable.title],
+                        description = it[TaskTable.description],
+                        createdDateTime = it[TaskTable.createdDateTime].toStandardLocalDateTime(),
+                        updatedDateTime = it[TaskTable.updatedDateTime].toStandardLocalDateTime(),
+                        completed = it[TaskTable.isCompleted]
+                    )
+                }
+                .firstOrNull()
+        }
+    }
     private fun DateTime.toStandardLocalDateTime(): LocalDateTime {
         return LocalDateTime.ofInstant(toDate().toInstant(), ZoneId.systemDefault())
     }
