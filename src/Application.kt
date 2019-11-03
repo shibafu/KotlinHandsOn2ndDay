@@ -14,6 +14,9 @@ import io.ktor.response.*
 import io.ktor.request.*
 import io.ktor.routing.get
 import io.ktor.routing.routing
+import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.transactions.transaction
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -22,6 +25,13 @@ fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 @Suppress("unused") // Referenced in application.conf
 @kotlin.jvm.JvmOverloads
 fun Application.module(testing: Boolean = false) {
+    Database.connect(
+        url = "jdbc:h2:file:./database",
+        driver = "org.h2.Driver"
+    )
+    transaction {
+        SchemaUtils.create(TaskTable)
+    }
     install(CORS) {
         anyHost()
         method(HttpMethod.Patch)
@@ -36,32 +46,11 @@ fun Application.module(testing: Boolean = false) {
             })
         }
     }
+    val taskRepository: TaskRepository = ExposedTaskRepository()
+    val TaskController = TaskController(taskRepository)
     routing {
         get("/tasks"){
-            val Tasks = listOf(
-                Task("今日のお仕事",
-                    "今日はKotolinでAPI作るよ",
-                    LocalDateTime.now(),
-                    LocalDateTime.now(),
-                    123,
-                    false),
-
-                Task("今日のお仕事",
-                    "今日はKotolinでAPI作るよ",
-                    LocalDateTime.now(),
-                    LocalDateTime.now(),
-                    124,
-                    true),
-
-                Task("今日のお仕事",
-                "ウェブフレームワークを勉強するよ！",
-                LocalDateTime.now(),
-                LocalDateTime.now(),
-                124,
-                true)
-
-            )
-            call.respond(Tasks)
+            TaskController.index(call)
         }
     }
 }

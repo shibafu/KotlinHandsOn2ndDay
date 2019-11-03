@@ -34,4 +34,5 @@ dependencies {
     testCompile "io.ktor:ktor-server-tests:$ktor_version"
     implementation "io.ktor:ktor-jackson:$ktor_version"
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.10.0'
+    implementation 'org.jetbrains.exposed:exposed:0.17.6'
 }
