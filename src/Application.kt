@@ -5,7 +5,10 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer
 import io.ktor.application.*
+import io.ktor.features.CORS
 import io.ktor.features.ContentNegotiation
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpMethod
 import io.ktor.jackson.jackson
 import io.ktor.response.*
 import io.ktor.request.*
@@ -19,6 +22,11 @@ fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 @Suppress("unused") // Referenced in application.conf
 @kotlin.jvm.JvmOverloads
 fun Application.module(testing: Boolean = false) {
+    install(CORS) {
+        anyHost()
+        method(HttpMethod.Patch)
+        header(HttpHeaders.ContentType)
+    }
     install(ContentNegotiation){
         jackson {
             propertyNamingStrategy = PropertyNamingStrategy.SNAKE_CASE
